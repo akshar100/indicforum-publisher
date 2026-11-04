@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#292524" />
+      <stop offset="100%" stop-color="#0c0a09" />
+    </radialGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="url(#bg)" stroke="#d97706" stroke-width="2" />
+  <circle cx="50" cy="50" r="34" fill="url(#gold)" stroke="#fef3c7" stroke-width="1.5" />
+  <text x="50" y="62" font-family="'Kohinoor Devanagari', 'Devanagari MT', 'Arial', sans-serif" font-size="36" font-weight="900" fill="#0c0a09" text-anchor="middle">ॐ</text>
+</svg>

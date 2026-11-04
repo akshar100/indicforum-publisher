@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>IndicForum Publisher — Progressive Web App</title>
+  
+  <!-- PWA Meta -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#d97706">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IF Publisher">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            amber: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+            },
+            stone: {
+              850: '#171412',
+              900: '#1c1917',
+              950: '#0c0a09',
+            }
+          },
+          fontFamily: {
+            serif: ['Georgia', 'Cambria', 'Times New Roman', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Vendor JSZip -->
+  <script src="vendor/jszip.min.js"></script>
+</head>
+<body class="bg-stone-950 text-stone-200 min-h-screen flex flex-col antialiased selection:bg-amber-600 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 bg-stone-950/85 backdrop-blur-md border-b border-stone-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-600/20 border border-amber-400/30">
+          <svg class="w-6 h-6 text-stone-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold font-serif text-stone-100 leading-tight">
+            IndicForum <span class="text-amber-500 font-sans text-xs tracking-wider uppercase px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 ml-1">Publisher PWA</span>
+          </h1>
+          <p class="text-xs text-stone-400 hidden sm:block">Automated GitHub Git Data & Static Event Pipeline</p>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-3">
+        <!-- Connection Status Pill -->
+        <div id="conn-status" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-stone-800 text-stone-400 border border-stone-700">
+          <span class="w-2 h-2 rounded-full bg-stone-500"></span>
+          <span>Checking connection...</span>
+        </div>
+
+        <!-- PWA Install Button -->
+        <button id="pwa-install-btn" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-500 text-stone-950 shadow-md transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Install App
+        </button>
+      </div>
+
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-stone-900 overflow-x-auto">
+      <nav class="flex space-x-1 sm:space-x-2 py-2">
+        <button data-tab-target="dashboard" class="px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg border border-amber-500 text-amber-400 bg-amber-500/10 flex items-center gap-2 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          Dashboard
+        </button>
+
+        <button data-tab-target="uploader" class="px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg border border-transparent text-stone-400 hover:text-stone-200 hover:bg-stone-900 flex items-center gap-2 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Image Uploader
+        </button>
+
+        <button data-tab-target="event-zip" class="px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg border border-transparent text-stone-400 hover:text-stone-200 hover:bg-stone-900 flex items-center gap-2 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          Publish Event (.zip)
+        </button>
+
+        <button data-tab-target="event-builder" class="px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg border border-transparent text-stone-400 hover:text-stone-200 hover:bg-stone-900 flex items-center gap-2 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          Visual Event Builder
+        </button>
+
+        <button data-tab-target="settings" class="px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg border border-transparent text-stone-400 hover:text-stone-200 hover:bg-stone-900 flex items-center gap-2 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Settings
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- =============================================================== -->
+    <!-- TAB 1: DASHBOARD -->
+    <!-- =============================================================== -->
+    <div id="tab-dashboard" class="tab-content space-y-8">
+      
+      <!-- Welcome Hero -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-stone-900 via-stone-900 to-amber-950/40 border border-stone-800 p-6 sm:p-8">
+        <div class="relative z-10 max-w-3xl">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 mb-3">
+            PWA Connected to GitHub
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-stone-100 tracking-tight mb-2">
+            Publish Content Directly to IndicForum
+          </h2>
+          <p class="text-stone-300 text-sm sm:text-base leading-relaxed">
+            This Progressive Web App runs completely client-side in your browser. It uses your GitHub Personal Access Token to commit images and structured event packages directly to your repository. Every commit triggers an automatic Vercel production rebuild.
+          </p>
+          <div class="flex flex-wrap gap-3 mt-6">
+            <button onclick="document.querySelector('[data-tab-target=uploader]').click()" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-amber-600/20 transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              Upload New Image
+            </button>
+            <button onclick="document.querySelector('[data-tab-target=event-zip]').click()" class="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-100 font-semibold rounded-xl text-sm border border-stone-700 flex items-center gap-2 transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+              Publish Event Package (.zip)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Status Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="p-5 rounded-2xl bg-stone-900 border border-stone-800">
+          <div class="text-xs uppercase tracking-wider font-semibold text-stone-400 mb-1">GitHub Account</div>
+          <div id="dash-github-user" class="text-lg font-bold text-stone-100 truncate">Not Connected</div>
+          <div class="text-xs text-stone-500 mt-2">Authenticated via PAT</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-stone-900 border border-stone-800">
+          <div class="text-xs uppercase tracking-wider font-semibold text-stone-400 mb-1">Target Repository</div>
+          <div id="dash-github-repo" class="text-lg font-bold text-amber-400 truncate">akshar100/indicforum-static</div>
+          <div class="text-xs text-stone-500 mt-2">Branch: main</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-stone-900 border border-stone-800">
+          <div class="text-xs uppercase tracking-wider font-semibold text-stone-400 mb-1">Production Domain</div>
+          <div class="text-lg font-bold text-stone-100 truncate">indicforum.org</div>
+          <div class="text-xs text-stone-500 mt-2">Vercel Auto-deploy</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-stone-900 border border-stone-800">
+          <div class="text-xs uppercase tracking-wider font-semibold text-stone-400 mb-1">PWA Capabilities</div>
+          <div class="text-lg font-bold text-emerald-400 flex items-center gap-1.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Offline Ready
+          </div>
+          <div class="text-xs text-stone-500 mt-2">Service Worker active</div>
+        </div>
+
+      </div>
+
+      <!-- Recent Publishing History -->
+      <div class="rounded-3xl bg-stone-900 border border-stone-800 overflow-hidden">
+        <div class="px-6 py-4 border-b border-stone-800 flex items-center justify-between">
+          <h3 class="font-serif font-bold text-stone-100">Recent Publishing History</h3>
+          <button id="btn-clear-history" class="text-xs text-stone-400 hover:text-stone-200">Clear History</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="text-xs uppercase tracking-wider bg-stone-950/60 text-stone-400 border-b border-stone-800">
+              <tr>
+                <th class="py-3 px-4">Type</th>
+                <th class="py-3 px-4">Title / Asset</th>
+                <th class="py-3 px-4">Commit</th>
+                <th class="py-3 px-4">Timestamp</th>
+                <th class="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+          <div id="history-empty" class="p-8 text-center text-stone-500 text-sm">
+            No publishing activity recorded yet in this browser.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- =============================================================== -->
+    <!-- TAB 2: IMAGE UPLOADER -->
+    <!-- =============================================================== -->
+    <div id="tab-uploader" class="tab-content hidden space-y-6">
+      
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-serif font-bold text-stone-100">Upload Image Asset</h2>
+          <p class="text-sm text-stone-400">Upload images directly to the GitHub repository and get CDN/production links.</p>
+        </div>
+      </div>
+
+      <!-- Drag & Drop Zone -->
+      <div id="img-dropzone" class="border-2 border-dashed border-stone-700 hover:border-amber-500/80 rounded-3xl p-10 text-center cursor-pointer bg-stone-900/60 hover:bg-stone-900 transition-all flex flex-col items-center justify-center min-h-[260px]">
+        <input type="file" id="img-file-input" accept="image/*" class="hidden">
+        <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 mb-4">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <div class="text-base font-semibold text-stone-200">Drag & drop your image here, or <span class="text-amber-500 underline">browse files</span></div>
+        <div class="text-xs text-stone-400 mt-2">Supports JPG, PNG, WebP, SVG (up to 20MB)</div>
+      </div>
+
+      <!-- Preview & Configuration Section -->
+      <div id="img-preview-section" class="hidden rounded-3xl bg-stone-900 border border-stone-800 p-6 space-y-6">
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+          
+          <!-- Image preview container -->
+          <div class="w-full md:w-1/3 aspect-[4/3] rounded-2xl overflow-hidden bg-stone-950 border border-stone-800 flex items-center justify-center relative">
+            <img id="img-preview-img" src="" alt="Preview" class="max-w-full max-h-full object-contain">
+          </div>
+
+          <!-- Configuration Fields -->
+          <div class="w-full md:w-2/3 space-y-4">
+            <div id="img-meta" class="text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg inline-block"></div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Target Filename</label>
+              <input type="text" id="img-filename-input" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Full Repository Path</label>
+              <input type="text" id="img-path-input" readonly class="w-full bg-stone-950/60 border border-stone-800 rounded-xl px-4 py-2.5 text-sm font-mono text-stone-400">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Git Commit Message</label>
+              <input type="text" id="img-commit-msg" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div class="flex gap-3 pt-2">
+              <button id="btn-upload-image" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-amber-600/20 transition-all">
+                <span>Upload to GitHub</span>
+              </button>
+              <button id="btn-cancel-image" class="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 font-semibold rounded-xl text-sm transition-all">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Upload Results & Links -->
+      <div id="img-result-section" class="hidden rounded-3xl bg-stone-900 border border-emerald-900/60 p-6 space-y-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-emerald-300">Image Uploaded Successfully!</h3>
+            <p class="text-xs text-stone-400">Committed to <code class="text-amber-400">main</code>. Public links and snippets are ready below:</p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Production Domain Link -->
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">IndicForum Production URL</div>
+            <div class="flex gap-2">
+              <input type="text" id="res-domain-url" readonly class="flex-1 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs font-mono text-stone-200">
+              <button data-copy-target="res-domain-url" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold rounded-xl transition-all">Copy</button>
+            </div>
+          </div>
+
+          <!-- Raw GitHub URL -->
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Raw GitHub URL</div>
+            <div class="flex gap-2">
+              <input type="text" id="res-raw-url" readonly class="flex-1 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs font-mono text-stone-200">
+              <button data-copy-target="res-raw-url" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold rounded-xl transition-all">Copy</button>
+            </div>
+          </div>
+
+          <!-- jsDelivr CDN URL -->
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">jsDelivr Global CDN URL</div>
+            <div class="flex gap-2">
+              <input type="text" id="res-jsdelivr-url" readonly class="flex-1 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs font-mono text-stone-200">
+              <button data-copy-target="res-jsdelivr-url" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold rounded-xl transition-all">Copy</button>
+            </div>
+          </div>
+
+          <!-- Markdown Snippet -->
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Markdown Snippet</div>
+            <div class="flex gap-2">
+              <input type="text" id="res-markdown" readonly class="flex-1 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs font-mono text-stone-200">
+              <button data-copy-target="res-markdown" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold rounded-xl transition-all">Copy</button>
+            </div>
+          </div>
+
+          <!-- HTML Snippet -->
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">HTML Image Tag</div>
+            <div class="flex gap-2">
+              <input type="text" id="res-html" readonly class="flex-1 bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs font-mono text-stone-200">
+              <button data-copy-target="res-html" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold rounded-xl transition-all">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-stone-800 flex items-center justify-between">
+          <div class="text-xs text-stone-400">
+            Commit SHA: <a id="res-commit-link" href="#" target="_blank" class="text-amber-400 font-mono underline"></a>
+          </div>
+          <button id="btn-upload-another" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-stone-950 text-xs font-bold rounded-xl transition-all">
+            Upload Another Image
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- =============================================================== -->
+    <!-- TAB 3: PUBLISH EVENT (.ZIP) -->
+    <!-- =============================================================== -->
+    <div id="tab-event-zip" class="tab-content hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-serif font-bold text-stone-100">Publish Event from Zip Package</h2>
+          <p class="text-sm text-stone-400">Upload a zip archive containing <code class="text-amber-400">event.json</code>, <code class="text-amber-400">description.md</code>, and cover image.</p>
+        </div>
+        <button id="btn-download-sample" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold rounded-xl border border-stone-700 flex items-center gap-2 self-start sm:self-auto transition-all">
+          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download Sample Zip Template
+        </button>
+      </div>
+
+      <!-- Zip Dropzone -->
+      <div id="zip-dropzone" class="border-2 border-dashed border-stone-700 hover:border-amber-500/80 rounded-3xl p-10 text-center cursor-pointer bg-stone-900/60 hover:bg-stone-900 transition-all flex flex-col items-center justify-center min-h-[260px]">
+        <input type="file" id="zip-file-input" accept=".zip" class="hidden">
+        <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 mb-4">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        </div>
+        <div class="text-base font-semibold text-stone-200">Drag & drop your event .zip package here, or <span class="text-amber-500 underline">browse files</span></div>
+        <div class="text-xs text-stone-400 mt-2">Includes metadata, full description markdown, and cover graphics</div>
+      </div>
+
+      <!-- Zip Preview & Publishing Section -->
+      <div id="zip-preview-section" class="hidden rounded-3xl bg-stone-900 border border-stone-800 p-6 space-y-6">
+        
+        <!-- Files In Package & Validation Alert -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-4 rounded-2xl bg-stone-950 border border-stone-800">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">Files in Archive</h4>
+            <ul id="zip-files-list" class="space-y-1"></ul>
+          </div>
+
+          <div class="md:col-span-2 space-y-4">
+            <div id="zip-validation-alert" class="hidden p-4 rounded-2xl bg-red-950/80 border border-red-800"></div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Git Commit Message</label>
+              <input type="text" id="zip-commit-msg" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div class="flex gap-3 pt-2">
+              <button id="btn-publish-zip" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-amber-600/20 transition-all">
+                <span>Publish Event to GitHub</span>
+              </button>
+              <button id="btn-cancel-zip" class="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 font-semibold rounded-xl text-sm transition-all">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Event Card Preview -->
+        <div>
+          <h4 class="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">Live IndicForum Website Preview</h4>
+          <div id="zip-card-container"></div>
+        </div>
+
+      </div>
+
+      <!-- Publish Success Section -->
+      <div id="zip-result-section" class="hidden rounded-3xl bg-stone-900 border border-emerald-900/60 p-6 space-y-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-emerald-300">Event Published to IndicForum!</h3>
+            <p class="text-xs text-stone-400">Atomic commit created via Git Data API. Vercel is now rebuilding the site.</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-stone-950 border border-stone-800 space-y-3">
+          <div class="text-sm font-semibold text-stone-100" id="res-zip-title"></div>
+          <div class="text-xs text-stone-400">Assigned Event ID: <span id="res-zip-id" class="text-amber-400 font-mono font-bold"></span></div>
+          <div class="text-xs text-stone-400">
+            Event URL: <a id="res-zip-event-link" href="#" target="_blank" class="text-amber-400 underline"></a>
+          </div>
+          <div class="text-xs text-stone-400">
+            GitHub Commit: <a id="res-zip-commit-link" href="#" target="_blank" class="text-stone-300 font-mono underline"></a>
+          </div>
+
+          <div class="pt-2">
+            <div class="text-xs font-semibold uppercase tracking-wider text-stone-500 mb-1">Committed Files:</div>
+            <ul id="res-zip-files-list" class="space-y-1"></ul>
+          </div>
+        </div>
+
+        <button id="btn-publish-another-zip" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold rounded-xl text-xs transition-all">
+          Publish Another Event
+        </button>
+      </div>
+
+    </div>
+
+
+    <!-- =============================================================== -->
+    <!-- TAB 4: VISUAL EVENT BUILDER -->
+    <!-- =============================================================== -->
+    <div id="tab-event-builder" class="tab-content hidden space-y-6">
+      
+      <div>
+        <h2 class="text-2xl font-serif font-bold text-stone-100">Visual Event Builder</h2>
+        <p class="text-sm text-stone-400">Create an event using form fields. You can either publish directly to GitHub or export as a .zip package.</p>
+      </div>
+
+      <div class="rounded-3xl bg-stone-900 border border-stone-800 p-6 space-y-6">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Event Title *</label>
+            <input type="text" id="builder-title" placeholder="e.g. Ancient Mathematics: The Sulba Sutras" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Primary Speaker *</label>
+            <input type="text" id="builder-speaker" placeholder="e.g. Prof. K. Ramasubramanian" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Moderator / Host</label>
+            <input type="text" id="builder-moderator" placeholder="e.g. Akshar Prabhudesai" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Date & Time (UTC / ISO) *</label>
+            <input type="text" id="builder-datetime" placeholder="2026-11-20 16:00:00.000000" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm font-mono text-stone-200 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Duration (Mins)</label>
+              <input type="number" id="builder-minutes" value="90" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Status</label>
+              <select id="builder-status" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-3 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+                <option value="upcoming">Upcoming</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Location / Format</label>
+            <input type="text" id="builder-location" value="Zoom Online Webinar" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">YouTube Recording URL</label>
+            <input type="text" id="builder-youtube" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Registration Link</label>
+            <input type="text" id="builder-registration" placeholder="https://tinyurl.com/..." class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Amazon Book Link</label>
+            <input type="text" id="builder-amazon" placeholder="https://www.amazon.in/dp/..." class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Cover Image</label>
+            <div class="flex items-center gap-4">
+              <input type="file" id="builder-cover-file" accept="image/*" class="text-xs text-stone-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-stone-800 file:text-stone-200 hover:file:bg-stone-700">
+              <img id="builder-cover-preview" src="" alt="Preview" class="hidden h-12 w-20 object-cover rounded-lg border border-stone-800">
+            </div>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Event Description (Markdown)</label>
+            <textarea id="builder-description" rows="6" placeholder="Write full description in Markdown:&#10;### About the Speaker...&#10;### About the Talk..." class="w-full bg-stone-950 border border-stone-700 rounded-xl p-4 text-sm font-mono text-stone-200 focus:outline-none focus:border-amber-500"></textarea>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-4 border-t border-stone-800">
+          <button id="btn-builder-publish" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-amber-600/20 transition-all">
+            <span>Review & Publish Directly</span>
+          </button>
+          <button id="btn-builder-export-zip" class="px-5 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-200 font-semibold rounded-xl text-sm border border-stone-700 flex items-center gap-2 transition-all">
+            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export as .Zip Package
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =============================================================== -->
+    <!-- TAB 5: SETTINGS -->
+    <!-- =============================================================== -->
+    <div id="tab-settings" class="tab-content hidden space-y-6">
+      
+      <div>
+        <h2 class="text-2xl font-serif font-bold text-stone-100">Settings & Authentication</h2>
+        <p class="text-sm text-stone-400">Configure your GitHub Personal Access Token and repository targets.</p>
+      </div>
+
+      <div class="rounded-3xl bg-stone-900 border border-stone-800 p-6 space-y-6">
+        
+        <!-- PAT Guide Callout -->
+        <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 space-y-2">
+          <div class="font-bold text-amber-300 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            How to get a GitHub Personal Access Token:
+          </div>
+          <ol class="list-decimal list-inside space-y-1 text-stone-300">
+            <li>Go to <a href="https://github.com/settings/tokens" target="_blank" rel="noopener" class="text-amber-400 underline">GitHub Settings &gt; Developer Settings &gt; Personal access tokens</a>.</li>
+            <li>Generate a classic token with <code class="bg-stone-950 px-1 py-0.5 rounded text-amber-400">repo</code> scope (Full control of private repositories).</li>
+            <li>Paste it below. The token is stored strictly in your local browser's <code class="bg-stone-950 px-1 py-0.5 rounded text-amber-400">localStorage</code> and never transmitted to any third-party server.</li>
+          </ol>
+        </div>
+
+        <div class="space-y-4">
+          <!-- PAT Field -->
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">GitHub Personal Access Token (PAT) *</label>
+            <div class="flex gap-2">
+              <input type="password" id="setting-pat" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="flex-1 bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm font-mono text-stone-200 focus:outline-none focus:border-amber-500">
+              <button id="btn-toggle-pat" type="button" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-semibold rounded-xl">Show</button>
+            </div>
+          </div>
+
+          <!-- Target Repo -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Target Repository *</label>
+              <input type="text" id="setting-repo" value="akshar100/indicforum-static" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm font-mono text-stone-200 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Branch</label>
+              <input type="text" id="setting-branch" value="main" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm font-mono text-stone-200 focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <!-- Production Domain & Asset Directory -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Production Domain</label>
+              <input type="text" id="setting-domain" value="https://indicforum.org" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm font-mono text-stone-200 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">Default Images Directory</label>
+              <input type="text" id="setting-asset-dir" value="assets/images" class="w-full bg-stone-950 border border-stone-700 rounded-xl px-4 py-2.5 text-sm font-mono text-stone-200 focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3 pt-4 border-t border-stone-800">
+          <button id="btn-save-settings" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold rounded-xl text-sm transition-all">
+            Save Settings
+          </button>
+          <button id="btn-test-settings" class="px-5 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-200 font-semibold rounded-xl text-sm border border-stone-700 transition-all">
+            Test Connection
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-auto border-t border-stone-900 bg-stone-950/80 py-4 text-center text-xs text-stone-500 safe-bottom">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>IndicForum Publisher PWA • Offline Capable • Built for IndicCouncil</div>
+      <div class="flex gap-4">
+        <a href="https://indicforum.org" target="_blank" rel="noopener" class="hover:text-amber-400">IndicForum.org</a>
+        <a href="https://github.com/akshar100/indicforum-static" target="_blank" rel="noopener" class="hover:text-amber-400">Repository</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script src="js/github.js"></script>
+  <script src="js/zip-handler.js"></script>
+  <script src="js/site-generator.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

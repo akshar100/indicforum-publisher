@@ -1,0 +1,21 @@
+{
+  "name": "indicforum-publisher",
+  "version": "1.0.0",
+  "description": "Progressive Web App that uses GitHub as backend for uploading media and publishing new events to IndicForum.org",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve . -l 3000",
+    "serve": "python3 -m http.server 3000",
+    "dev": "python3 -m http.server 8080"
+  },
+  "keywords": [
+    "pwa",
+    "github-api",
+    "indicforum",
+    "event-publisher",
+    "static-site",
+    "vercel"
+  ],
+  "author": "Akshar Prabhudesai <akshar@akshar.co.in>",
+  "license": "MIT"
+}

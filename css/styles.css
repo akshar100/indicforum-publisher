@@ -1,0 +1,92 @@
+/* Custom styles for IndicForum Publisher PWA */
+
+:root {
+  --color-amber-primary: #d97706;
+  --color-amber-hover: #b45309;
+  --color-amber-glow: rgba(217, 119, 6, 0.25);
+  --bg-dark: #0c0a09;
+  --bg-card: #1c1917;
+  --border-dark: #292524;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: #e7e5e4;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1c1917;
+}
+::-webkit-scrollbar-thumb {
+  background: #44403c;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #78716c;
+}
+
+/* Dropzone States */
+.dropzone-active {
+  border-color: #f59e0b !important;
+  background-color: rgba(217, 119, 6, 0.08) !important;
+  box-shadow: 0 0 25px var(--color-amber-glow);
+  transform: scale(1.005);
+}
+
+/* Card Glow */
+.card-glow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+.card-glow-amber {
+  box-shadow: 0 4px 25px -2px rgba(217, 119, 6, 0.15), 0 0 0 1px rgba(217, 119, 6, 0.3);
+}
+
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Code block formatting */
+pre code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+/* Toast notifications */
+#toast-container {
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Event live preview card styling matching indicforum.org */
+.indic-card {
+  background: #171412;
+  border: 1px solid #2e2621;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.indic-card:hover {
+  border-color: #d97706;
+}
+
+/* Mobile bottom nav safe area */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
